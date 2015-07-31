@@ -1,0 +1,7 @@
+build
+.savant
+.gradle
+*.iws
+.idea
+out
+.DS_Store
