@@ -41,40 +41,31 @@ public class TwoFactorTest {
     for (byte b : hash) {
       formatter.format("%02x", b);
     }
-    assertEquals(formatter.toString(), "85c27d3f088c0c8461d240c41021bc4f13d2456e");
-  }
-
-  @Test
-  public void encode_decode() throws Exception {
-    byte[] encoded = TwoFactor.encode("These pretzels are making me thirsty.");
-    assertEquals(new String(encoded, "UTF-8"), "KRUGK43FEBYHEZLUPJSWY4ZAMFZGKIDNMFVWS3THEBWWKIDUNBUXE43UPEXA====");
-
-    byte[] decoded = TwoFactor.decode("KRUGK43FEBYHEZLUPJSWY4ZAMFZGKIDNMFVWS3THEBWWKIDUNBUXE43UPEXA====");
-    assertEquals(new String(decoded, "UTF-8"), "These pretzels are making me thirsty.");
+    assertEquals(formatter.toString(), "f086f43907fa796d0a0ec74ae7180b7f83c61db6");
   }
 
   @Test(enabled = false)
   public void test_code_generations() throws Exception {
     AtomicReference<String> last = new AtomicReference<>();
-    IntStream.range(0, 10).forEach((n) -> {
+    IntStream.range(0, 100).forEach((n) -> {
       try {
         long instant = TwoFactor.getCurrentWindowInstant();
-        String oneTimePassword =
-            TwoFactor.calculateVerificationCode("JBSWY3DPEHPK3PXP", instant);
+        String oneTimePassword = TwoFactor.calculateVerificationCode("HELLO", instant);
         if (!oneTimePassword.equals(last.get())) {
           System.out.print(oneTimePassword + "\n");
         }
         last.set(oneTimePassword);
         Thread.sleep(1000);
       } catch (Exception e) {
+        e.printStackTrace();
       }
     });
   }
 
   @Test
   public void validate() throws Exception {
-    String encodedSecret = "KRUGK43FEBYHEZLUPJSWY4ZAMFZGKIDNMFVWS3THEBWWKIDUNBUXE43UPEXA====";
+    String rawSecret = "These pretzels are making me thirsty.";
     long instant = 47893469;
-    assertTrue(TwoFactor.validateVerificationCode(encodedSecret, instant, "991696"));
+    assertTrue(TwoFactor.validateVerificationCode(rawSecret, instant, "991696"));
   }
 }
