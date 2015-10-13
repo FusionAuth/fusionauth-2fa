@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 
 import org.testng.annotations.Test;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertTrue;
 
 /**
@@ -42,6 +43,16 @@ public class TwoFactorTest {
       formatter.format("%02x", b);
     }
     assertEquals(formatter.toString(), "f086f43907fa796d0a0ec74ae7180b7f83c61db6");
+  }
+
+  @Test
+  public void generateRawSecret() {
+    String rawSecret = TwoFactor.generateRawSecret();
+    assertNotNull(rawSecret);
+    System.out.println(rawSecret);
+
+    String code = TwoFactor.calculateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant());
+    assertTrue(TwoFactor.validateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant(), code));
   }
 
   @Test(enabled = false)

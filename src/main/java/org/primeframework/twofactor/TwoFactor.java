@@ -21,6 +21,8 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Base64;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -67,7 +69,24 @@ public final class TwoFactor {
       mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA1"));
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-      throw new RuntimeException(e);
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * Return the current timestamp using the default window size of 30 seconds.
+   *
+   * @return The current window instant.
+   */
+  public static String generateRawSecret() {
+    try {
+      byte[] buf = new byte[8];
+      SecureRandom.getInstanceStrong().nextBytes(buf);
+      String rawSecret = Base64.getEncoder().encodeToString(buf);
+      return rawSecret.substring(1, 11);
+    } catch (NoSuchAlgorithmException e) {
+      // Not really possible
+      throw new IllegalStateException(e);
     }
   }
 
