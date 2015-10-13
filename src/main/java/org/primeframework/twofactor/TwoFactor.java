@@ -57,6 +57,24 @@ public final class TwoFactor {
   }
 
   /**
+   * Return the a generated raw secret. The consumer of this secret will need to Base32 encode the secret before using
+   * it to generate a QR code.
+   *
+   * @return The raw secret.
+   */
+  public static String generateRawSecret() {
+    try {
+      byte[] buf = new byte[8];
+      SecureRandom.getInstanceStrong().nextBytes(buf);
+      String rawSecret = Base64.getEncoder().encodeToString(buf);
+      return rawSecret.substring(1, 11);
+    } catch (NoSuchAlgorithmException e) {
+      // Not really possible
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
    * Return the HMAC SHA-1 encoded byte array using the base32 encoded secret and the data.
    *
    * @param rawSecret The secret.
@@ -69,23 +87,6 @@ public final class TwoFactor {
       mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA1"));
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
-      throw new IllegalStateException(e);
-    }
-  }
-
-  /**
-   * Return the current timestamp using the default window size of 30 seconds.
-   *
-   * @return The current window instant.
-   */
-  public static String generateRawSecret() {
-    try {
-      byte[] buf = new byte[8];
-      SecureRandom.getInstanceStrong().nextBytes(buf);
-      String rawSecret = Base64.getEncoder().encodeToString(buf);
-      return rawSecret.substring(1, 11);
-    } catch (NoSuchAlgorithmException e) {
-      // Not really possible
       throw new IllegalStateException(e);
     }
   }
@@ -122,6 +123,12 @@ public final class TwoFactor {
     return code.equals(actual);
   }
 
+  /**
+   * Return an int by taking four bytes of the provided byte array and taking the unsigned int value.
+   *
+   * @param hash
+   * @return an int value
+   */
   private static int bytesToUnsignedInt(byte[] hash) {
     int offset = hash[hash.length - 1] & 0xF;
     long truncated = 0;

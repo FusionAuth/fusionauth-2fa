@@ -36,7 +36,7 @@ public class TwoFactorTest {
    */
   @Test
   public void control() throws Exception {
-    byte[] hash = TwoFactor.generateSha1HMAC("Inversoft", "These pretzels are making me thirsty".getBytes("UTF-8"));
+    byte[] hash = TwoFactor.generateSha1HMAC("Inversoft", "These pretzels are making me thirsty" .getBytes("UTF-8"));
 
     Formatter formatter = new Formatter();
     for (byte b : hash) {
@@ -57,11 +57,12 @@ public class TwoFactorTest {
 
   @Test(enabled = false)
   public void test_code_generations() throws Exception {
+    String rawSecret = TwoFactor.generateRawSecret(); // Set your secret here for testing purposes
     AtomicReference<String> last = new AtomicReference<>();
     IntStream.range(0, 100).forEach((n) -> {
       try {
         long instant = TwoFactor.getCurrentWindowInstant();
-        String oneTimePassword = TwoFactor.calculateVerificationCode("HELLO", instant);
+        String oneTimePassword = TwoFactor.calculateVerificationCode(rawSecret, instant);
         if (!oneTimePassword.equals(last.get())) {
           System.out.print(oneTimePassword + "\n");
         }
