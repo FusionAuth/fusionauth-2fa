@@ -63,15 +63,10 @@ public final class TwoFactor {
    * @return The raw secret.
    */
   public static String generateRawSecret() {
-    try {
-      byte[] buf = new byte[8];
-      SecureRandom.getInstanceStrong().nextBytes(buf);
-      String rawSecret = Base64.getEncoder().encodeToString(buf);
-      return rawSecret.substring(1, 11);
-    } catch (NoSuchAlgorithmException e) {
-      // Not really possible
-      throw new IllegalStateException(e);
-    }
+    byte[] buf = new byte[8];
+    new SecureRandom().nextBytes(buf);
+    String rawSecret = Base64.getEncoder().encodeToString(buf);
+    return rawSecret.substring(1, 11);
   }
 
   /**
