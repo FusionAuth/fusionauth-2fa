@@ -57,8 +57,9 @@ public final class TwoFactor {
   }
 
   /**
-   * Return the a generated raw secret. The consumer of this secret will need to Base32 encode the secret before using
-   * it to generate a QR code.
+   * Generates the secret used to generate time based one time passwords.
+   * <p>
+   * If this secret will be used to generate  QR code to display to a user, it will need to be Base32 encoded.
    *
    * @return The raw secret.
    */

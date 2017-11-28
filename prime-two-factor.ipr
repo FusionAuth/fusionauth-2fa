@@ -39,8 +39,6 @@
     </properties>
   </component>
   <component name="CompilerConfiguration">
-    <option name="DEFAULT_COMPILER" value="Javac" />
-    <resourceExtensions />
     <wildcardResourcePatterns>
       <entry name="!?*.java" />
       <entry name="!?*.form" />
@@ -51,15 +49,16 @@
       <entry name="!?*.kt" />
       <entry name="!?*.clj" />
     </wildcardResourcePatterns>
-    <annotationProcessing>
-      <profile default="true" name="Default" enabled="false">
-        <processorPath useClasspath="true" />
-      </profile>
-    </annotationProcessing>
   </component>
   <component name="CopyrightManager" default="" />
-  <component name="EntryPointsManager">
-    <entry_points version="2.0" />
+  <component name="Encoding">
+    <file url="PROJECT" charset="UTF-8" />
+  </component>
+  <component name="InspectionProjectProfileManager">
+    <profile version="1.0">
+      <option name="myName" value="Project Default" />
+    </profile>
+    <version value="1.0" />
   </component>
   <component name="Palette2">
     <group name="Swing">
@@ -209,6 +208,7 @@
             <package name="" withSubpackages="true" static="true" />
           </value>
         </option>
+        <option name="JD_PRESERVE_LINE_FEEDS" value="true" />
         <option name="WRAP_COMMENTS" value="true" />
         <GroovyCodeStyleSettings>
           <option name="CLASS_COUNT_TO_USE_IMPORT_ON_DEMAND" value="9999" />
@@ -218,6 +218,9 @@
           <option name="DO_NOT_WRAP_AFTER_SINGLE_ANNOTATION" value="true" />
           <option name="CLASS_NAMES_IN_JAVADOC" value="3" />
         </JavaCodeStyleSettings>
+        <MarkdownNavigatorCodeStyleSettings>
+          <option name="RIGHT_MARGIN" value="72" />
+        </MarkdownNavigatorCodeStyleSettings>
         <SqlCodeStyleSettings>
           <option name="NEW_LINE_BEFORE_QUERY_INSIDE_PARENTHESIS" value="true" />
           <option name="NEW_LINE_BEFORE_QUERY_INSIDE_DML" value="true" />
@@ -966,7 +969,7 @@
       <module fileurl="file://$PROJECT_DIR$/prime-two-factor.iml" filepath="$PROJECT_DIR$/prime-two-factor.iml" />
     </modules>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_8" default="true" assert-keyword="true" jdk-15="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="false">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
   <component name="VcsDirectoryMappings">

@@ -1,0 +1,150 @@
+<html>
+<head>
+    <title>Two Factor Code Generator</title>
+
+    <script type="text/javascript" src="../js/prime-0.34.0.js"></script>
+    <script type="text/javascript" src="../js/jquery-2.1.4.js"></script>
+    <script type="text/javascript" src="../js/sha.js"></script>
+    <script type="text/javascript" src="../js/jquery.qrcode-0.12.0.js"></script>
+    <script type="text/javascript" src="../js/example.js"></script>
+
+</head>
+
+<body>
+
+<div style="margin: auto;">
+    <form>
+        <table>
+            <tr>
+                <td>Secret:</td>
+                <td>
+                    <input id="raw_secret" name="raw_secret" type="text" size="75" value="testing123">
+                    <input type="button" id="fixLength" value="Fix Secret Length">
+                </td>
+
+            </tr>
+            <tr>
+                <td>Base32 Encoded Secret:</td>
+                <td>
+                    <input id="secret" name="secret" type="text" size="75" value="ORSXG5DJNZTTCMRT">
+                </td>
+            </tr>
+            <tr>
+                <td>Issuer:</td>
+                <td><input id="issuer" name="issuer" type="text" size="75" value="Passport"></td>
+            </tr>
+            <tr>
+                <td>User:</td>
+                <td><input id="user" name="user" type="text" size="75" value="admin"></td>
+            </tr>
+            <tr>
+                <td>Host:</td>
+                <td><input id="host" name="host" type="text"  size="75" value="sso.inversoft.com"></td>
+            </tr>
+            <tr>
+                <td>One Time Code:</td>
+                <td>
+                    <div><span id="otp"></span></div>
+                    <div id="progress" style="width: 0px; height: 2px; background-color: #4c4cff;"></div>
+                </td>
+            </tr>
+        </table>
+    </form>
+
+    <div id="qr_code">
+        <img id="qrImg">
+    </div>
+
+    <div id="qr_url" class="code" style="display: none;">
+    </div>
+
+    <div id="updateIn" style="margin-top: 75px; display: none;">
+        Updating in ....
+    </div>
+
+    <br><br>
+
+
+</div>
+
+</body>
+
+<script type="text/javascript">
+
+    Prime.Document.onReady(function() {
+
+        var raw = Prime.Document.queryByID('raw_secret');
+        var secret = Prime.Document.queryByID('secret');
+        var issuer = Prime.Document.queryByID('issuer');
+        var user = Prime.Document.queryByID('user');
+        var host = Prime.Document.queryByID('host');
+        var qrCode = Prime.Document.queryByID('qr_code');
+        var qrImg = Prime.Document.queryByID('qrImg');
+        var qrUrl = Prime.Document.queryByID('qr_url');
+        var updatingIn = Prime.Document.queryByID('updateIn');
+        var otp = Prime.Document.queryByID('otp');
+        var fixLength = Prime.Document.queryByID('fixLength');
+
+        var handleFixLength = function() {
+            var padding = "zzzzzzzzzz";
+            raw.setValue((padding + raw.getValue()).slice(-padding.length));
+            handleKeyUp();
+        };
+
+        var handleChange = function() {
+
+            qrCode.setHTML('');
+
+            $('#qr_code').qrcode({
+                "size": 250,
+                "color": '#3a3',
+                "text": 'otpauth://totp/' + user.getValue() + '@' + host.getValue() + '?issuer=' + issuer.getValue() + '&secret=' + secret.getValue()
+            });
+        };
+
+        var handleKeyUp = function() {
+
+            var encodedSecret = Base32.encode(raw.getValue());
+            secret.setValue(encodedSecret);
+            handleChange();
+        };
+
+        raw.addEventListener('keyup', handleKeyUp, this);
+        secret.addEventListener('keyup', handleChange, this);
+        user.addEventListener('keyup', handleChange, this);
+        host.addEventListener('keyup', handleChange, this);
+        issuer.addEventListener('keyup', handleChange, this);
+        fixLength.addEventListener('click', handleFixLength, this);
+
+        handleChange();
+        updateOtp();
+
+        var progressCounter = -1;
+        setInterval(function() {
+
+            var epoch = Math.round(new Date().getTime() / 1000.0);
+            var countDown = 30 - (epoch % 30);
+
+            if (progressCounter === -1) {
+                progressCounter = countDown;
+            } else {
+                progressCounter = progressCounter - .1;
+            }
+
+            var progress = Prime.Document.queryByID('progress');
+
+            if (epoch % 30 == 0) {
+                progressCounter = -1;
+                progress.setStyle('width', '100%');
+                updateOtp();
+            }
+
+            var percentage = (progressCounter / 30) * 100;
+            progress.setStyle('width', percentage + '%');
+            updatingIn.setHTML("Updating in " + countDown + " seconds.");
+        }, 100);
+
+    });
+
+</script>
+</html>
