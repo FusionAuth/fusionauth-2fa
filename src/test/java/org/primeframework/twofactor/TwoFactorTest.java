@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Inversoft Inc., All Rights Reserved
+ * Copyright (c) 2015-2017, Inversoft Inc., All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,8 @@
  */
 package org.primeframework.twofactor;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.Formatter;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
@@ -72,6 +74,52 @@ public class TwoFactorTest {
         e.printStackTrace();
       }
     });
+  }
+
+  /**
+   * Test values from <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>
+   *
+   * Appendix D - HOTP Algorithm: Test Values
+   */
+  @Test
+  public void test_rfc4226_appendixD_HOTP_TestValues() {
+    String rawSecret = "12345678901234567890";
+
+    // Table 1 details for each count, the intermediate HMAC value.
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(0))), "cc93cf18508d94934c64b65d8ba7667fb7cde4b0");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(1))), "75a48a19d4cbe100644e8ac1397eea747a2d33ab");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(2))), "0bacb7fa082fef30782211938bc1c5e70416ff44");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(3))), "66c28227d03a2d5529262ff016a1e6ef76557ece");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(4))), "a904c900a64b35909874b33e61c5938a8e15ed1c");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(5))), "a37e783d7b7233c083d4f62926c7a25f238d0316");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(6))), "bc9cd28561042c83f219324d3c607256c03272ae");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(7))), "a4fb960c0bc06e1eabb804e5b397cdc4b45596fa");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(8))), "1b3c89f65e6c9e883012052823443f048b4332db");
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, toBigEndianArray(9))), "1637409809a679dc698207310c8c7fc07290d9e5");
+
+    // Table 2 details for each count the truncated values (both in hexadecimal and decimal) and then the HOTP value.
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 0), String.valueOf(755224));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 1), String.valueOf(287082));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 2), String.valueOf(359152));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 3), String.valueOf(969429));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 4), String.valueOf(338314));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 5), String.valueOf(254676));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 6), String.valueOf(287922));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 7), String.valueOf(162583));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 8), String.valueOf(399871));
+    assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 9), String.valueOf(520489));
+  }
+
+  private String toHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      sb.append(String.format("%02x", b));
+    }
+    return sb.toString();
+  }
+
+  private byte[] toBigEndianArray(int count) {
+    return ByteBuffer.allocate(8).putLong(count).order(ByteOrder.BIG_ENDIAN).array();
   }
 
   @Test
