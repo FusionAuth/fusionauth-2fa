@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Inversoft Inc., All Rights Reserved
+ * Copyright (c) 2015-2017, Inversoft Inc., All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -71,7 +71,8 @@ public final class TwoFactor {
   }
 
   /**
-   * Return the HMAC SHA-1 encoded byte array using the base32 encoded secret and the data.
+   * Return the HMAC SHA-1 encoded byte array using the base32 encoded secret and the data as
+   * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
    *
    * @param rawSecret The secret.
    * @param data      The data to add to the secret - assumed to be a time instant.
@@ -90,6 +91,11 @@ public final class TwoFactor {
   /**
    * Return the current timestamp using the default window size of 30 seconds.
    *
+   * <p>
+   * A 30 second time step is the recommended default value in <a href="https://tools.ietf.org/html/rfc6238#section-5.2">section 5.2</a>
+   * of <a href="https://tools.ietf.org/html/rfc6238">RFC 6238</a>.
+   * </p>
+   *
    * @return The current window instant.
    */
   public static long getCurrentWindowInstant() {
@@ -98,6 +104,11 @@ public final class TwoFactor {
 
   /**
    * Return the current timestamp using the specified window size.
+   *
+   * <p>
+   * The validation time-step size as defined by <a href="https://tools.ietf.org/html/rfc6238">RFC 6238</a> in
+   * <a href="https://tools.ietf.org/html/rfc6238#section-5.2">section 5.2</a>.
+   * </p>
    *
    * @param windowSize The window size in seconds.
    * @return The current window instant.
@@ -122,7 +133,7 @@ public final class TwoFactor {
   /**
    * Return an int by taking four bytes of the provided byte array and taking the unsigned int value.
    *
-   * @param hash
+   * @param hash the hashed message
    * @return an int value
    */
   private static int bytesToUnsignedInt(byte[] hash) {
