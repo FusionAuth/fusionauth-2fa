@@ -129,7 +129,8 @@ Base32.encode = function(s) {
     else if (leftover == 4) replace = 1;
 
     for (i = 0; i < replace; i++) parts.pop();
-    for (i = 0; i < replace; i++) parts.push("=");
+    // don't pad the encoded value
+    // for (i = 0; i < replace; i++) parts.push("=");
 
     return parts.join("");
 }

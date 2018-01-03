@@ -18,15 +18,20 @@
             <tr>
                 <td>Secret:</td>
                 <td>
-                    <input id="raw_secret" name="raw_secret" type="text" size="75" value="testing123">
-                    <input type="button" id="fixLength" value="Fix Secret Length">
+                    <input id="raw_secret" name="raw_secret" type="text" size="75" value="01234567890123456789">
                 </td>
 
             </tr>
             <tr>
                 <td>Base32 Encoded Secret:</td>
                 <td>
-                    <input id="secret" name="secret" type="text" size="75" value="ORSXG5DJNZTTCMRT">
+                    <input id="secret" name="secret" type="text" size="75" value="GAYTEMZUGU3DOOBZGAYTEMZUGU3DOOBZ">
+                </td>
+            </tr>
+            <tr>
+                <td>Key Length in Bits:</td>
+                <td>
+                    <input id="keyLength" name="keyLength" type="text" size="75" value="160">
                 </td>
             </tr>
             <tr>
@@ -83,13 +88,7 @@
         var qrUrl = Prime.Document.queryByID('qr_url');
         var updatingIn = Prime.Document.queryByID('updateIn');
         var otp = Prime.Document.queryByID('otp');
-        var fixLength = Prime.Document.queryByID('fixLength');
-
-        var handleFixLength = function() {
-            var padding = "zzzzzzzzzz";
-            raw.setValue((padding + raw.getValue()).slice(-padding.length));
-            handleKeyUp();
-        };
+        var keyLength = Prime.Document.queryByID('keyLength');
 
         var handleChange = function() {
 
@@ -106,6 +105,7 @@
 
             var encodedSecret = Base32.encode(raw.getValue());
             secret.setValue(encodedSecret);
+            keyLength.setValue(raw.getValue().length * 8);
             handleChange();
         };
 
@@ -114,7 +114,6 @@
         user.addEventListener('keyup', handleChange, this);
         host.addEventListener('keyup', handleChange, this);
         issuer.addEventListener('keyup', handleChange, this);
-        fixLength.addEventListener('click', handleFixLength, this);
 
         handleChange();
         updateOtp();

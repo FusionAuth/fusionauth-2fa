@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, Inversoft Inc., All Rights Reserved
+ * Copyright (c) 2015-2018, Inversoft Inc., All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +31,9 @@ import static org.testng.Assert.assertTrue;
  */
 public class TwoFactorTest {
 
-  /**
-   * Assert known secrets and their SHA1 HMAC values to ensure the hash calculation is correct.
-   *
-   * @throws Exception
-   */
   @Test
   public void control() throws Exception {
-    byte[] hash = TwoFactor.generateSha1HMAC("Inversoft", "These pretzels are making me thirsty" .getBytes("UTF-8"));
+    byte[] hash = TwoFactor.generateSha1HMAC("Inversoft", "These pretzels are making me thirsty".getBytes("UTF-8"));
 
     Formatter formatter = new Formatter();
     for (byte b : hash) {
@@ -55,6 +50,19 @@ public class TwoFactorTest {
 
     String code = TwoFactor.calculateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant());
     assertTrue(TwoFactor.validateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant(), code));
+  }
+
+  /**
+   * RFC 4226 in section 4 suggests a minimum of 128 bits with a recommended length of 160 bits.
+   *
+   * https://tools.ietf.org/html/rfc4226
+   */
+  @Test
+  public void test_bitLengths() throws Exception {
+    assertEquals(TwoFactor.generateRawSecret(10).getBytes().length * 8, 80);
+    assertEquals(TwoFactor.generateRawSecret(20).getBytes().length * 8, 160);
+    assertEquals(TwoFactor.generateRawSecret(32).getBytes().length * 8, 256);
+    assertEquals(TwoFactor.generateRawSecret().getBytes().length * 8, 160);
   }
 
   @Test(enabled = false)
@@ -110,22 +118,22 @@ public class TwoFactorTest {
     assertEquals(TwoFactor.calculateVerificationCode(rawSecret, 9), String.valueOf(520489));
   }
 
-  private String toHex(byte[] bytes) {
-    StringBuilder sb = new StringBuilder();
-    for (byte b : bytes) {
-      sb.append(String.format("%02x", b));
-    }
-    return sb.toString();
+  @Test
+  public void validate() throws Exception {
+    String rawSecret = "These pretzels are making me thirsty.";
+    long instant = 47893469;
+    assertTrue(TwoFactor.validateVerificationCode(rawSecret, instant, "991696"));
   }
 
   private byte[] toBigEndianArray(int count) {
     return ByteBuffer.allocate(8).putLong(count).order(ByteOrder.BIG_ENDIAN).array();
   }
 
-  @Test
-  public void validate() throws Exception {
-    String rawSecret = "These pretzels are making me thirsty.";
-    long instant = 47893469;
-    assertTrue(TwoFactor.validateVerificationCode(rawSecret, instant, "991696"));
+  private String toHex(byte[] bytes) {
+    StringBuilder sb = new StringBuilder();
+    for (byte b : bytes) {
+      sb.append(String.format("%02x", b));
+    }
+    return sb.toString();
   }
 }

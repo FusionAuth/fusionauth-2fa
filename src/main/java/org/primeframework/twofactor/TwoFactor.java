@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2017, Inversoft Inc., All Rights Reserved
+ * Copyright (c) 2015-2018, Inversoft Inc., All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -57,17 +57,30 @@ public final class TwoFactor {
   }
 
   /**
-   * Generates the secret used to generate time based one time passwords.
+   * Generates the secret used to generate time based one time passwords. The length of the string will be 20
+   * characters or 160 bits.
    * <p>
    * If this secret will be used to generate  QR code to display to a user, it will need to be Base32 encoded.
    *
    * @return The raw secret.
    */
   public static String generateRawSecret() {
-    byte[] buf = new byte[8];
+    return generateRawSecret(20);
+  }
+
+  /**
+   * Generates the secret used to generate time based one time passwords.
+   * <p>
+   * If this secret will be used to generate  QR code to display to a user, it will need to be Base32 encoded.
+   *
+   * @param length the length of the raw secret in characters
+   * @return The raw secret.
+   */
+  public static String generateRawSecret(int length) {
+    byte[] buf = new byte[length];
     new SecureRandom().nextBytes(buf);
     String rawSecret = Base64.getEncoder().encodeToString(buf);
-    return rawSecret.substring(1, 11);
+    return rawSecret.substring(1, length + 1);
   }
 
   /**
