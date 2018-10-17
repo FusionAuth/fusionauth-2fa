@@ -1,7 +1,3 @@
-/*
- * Copyright (c) 2015, Inversoft Inc., All Rights Reserved
- */
-
 (function( global, factory ) {
 
   if ( typeof module === "object" && typeof module.exports === "object" ) {

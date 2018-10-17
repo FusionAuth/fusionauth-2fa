@@ -1729,7 +1729,7 @@
   </component>
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/prime-two-factor.iml" filepath="$PROJECT_DIR$/prime-two-factor.iml" />
+      <module fileurl="file://$PROJECT_DIR$/fusionauth-2FA.iml" filepath="$PROJECT_DIR$/fusionauth-2FA.iml" />
     </modules>
   </component>
   <component name="ProjectRootManager" version="2" languageLevel="JDK_1_3" default="false">

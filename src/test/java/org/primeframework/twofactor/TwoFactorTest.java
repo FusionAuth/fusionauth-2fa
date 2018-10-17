@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015-2018, Inversoft Inc., All Rights Reserved
+ * Copyright (c) 2015-2018, FusionAuth, All Rights Reserved
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -30,16 +30,15 @@ import static org.testng.Assert.assertTrue;
  * @author Daniel DeGroff
  */
 public class TwoFactorTest {
-
   @Test
   public void control() throws Exception {
-    byte[] hash = TwoFactor.generateSha1HMAC("Inversoft", "These pretzels are making me thirsty".getBytes("UTF-8"));
+    byte[] hash = TwoFactor.generateSha1HMAC("FusionAuth", "These pretzels are making me thirsty".getBytes("UTF-8"));
 
     Formatter formatter = new Formatter();
     for (byte b : hash) {
       formatter.format("%02x", b);
     }
-    assertEquals(formatter.toString(), "f086f43907fa796d0a0ec74ae7180b7f83c61db6");
+    assertEquals(formatter.toString(), "b8618ace38a6202a0cd4469e18d29c83ec7c6b43");
   }
 
   @Test
@@ -58,7 +57,7 @@ public class TwoFactorTest {
    * https://tools.ietf.org/html/rfc4226
    */
   @Test
-  public void test_bitLengths() throws Exception {
+  public void test_bitLengths() {
     assertEquals(TwoFactor.generateRawSecret(10).getBytes().length * 8, 80);
     assertEquals(TwoFactor.generateRawSecret(20).getBytes().length * 8, 160);
     assertEquals(TwoFactor.generateRawSecret(32).getBytes().length * 8, 256);
@@ -66,7 +65,7 @@ public class TwoFactorTest {
   }
 
   @Test(enabled = false)
-  public void test_code_generations() throws Exception {
+  public void test_code_generations() {
     String rawSecret = TwoFactor.generateRawSecret(); // Set your secret here for testing purposes
     AtomicReference<String> last = new AtomicReference<>();
     IntStream.range(0, 100).forEach((n) -> {
@@ -119,7 +118,7 @@ public class TwoFactorTest {
   }
 
   @Test
-  public void validate() throws Exception {
+  public void validate() {
     String rawSecret = "These pretzels are making me thirsty.";
     long instant = 47893469;
     assertTrue(TwoFactor.validateVerificationCode(rawSecret, instant, "991696"));
