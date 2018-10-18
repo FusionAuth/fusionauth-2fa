@@ -1,7 +1,16 @@
 ## Prime Two Factor ![semver 2.0.0 compliant](http://img.shields.io/badge/semver-2.0.0-brightgreen.svg?style=flat-square)
 
+### Web based testing
+To use the web based OTP generator with QRCode options, open the `web/html/example.html` file in your browser.
 
-### Building
+The following is an example screenshot. This tool can be useful for testing.
+
+![Example Screenshot](/web/images/example_screenshot.png)
+
+### Using the Java Helper
+The Java helper can be found in `src/main/java/io/fusionauth/twofactor/TwoFactor.java`.
+
+### Building in Savant
 **Note:** This project uses the Savant build tool. To compile using using Savant, follow these instructions:
 
 ```bash

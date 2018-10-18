@@ -13,7 +13,7 @@
  * either express or implied. See the License for the specific
  * language governing permissions and limitations under the License.
  */
-package org.primeframework.twofactor;
+package io.fusionauth.twofactor;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
