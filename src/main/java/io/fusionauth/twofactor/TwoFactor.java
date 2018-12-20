@@ -102,6 +102,42 @@ public final class TwoFactor {
   }
 
   /**
+   * Return the HMAC SHA-256 encoded byte array using the base32 encoded secret and the data as
+   * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
+   *
+   * @param rawSecret The secret.
+   * @param data      The data to add to the secret - assumed to be a time instant.
+   * @return A byte array of the HMAC SHA-256 hash.
+   */
+  public static byte[] generateSha256HMAC(String rawSecret, byte[] data) {
+    try {
+      Mac mac = Mac.getInstance("HmacSHA256");
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA256"));
+      return mac.doFinal(data);
+    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * Return the HMAC SHA-512 encoded byte array using the base32 encoded secret and the data as
+   * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
+   *
+   * @param rawSecret The secret.
+   * @param data      The data to add to the secret - assumed to be a time instant.
+   * @return A byte array of the HMAC SHA-512 hash.
+   */
+  public static byte[] generateSha512HMAC(String rawSecret, byte[] data) {
+    try {
+      Mac mac = Mac.getInstance("HmacSHA512");
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA512"));
+      return mac.doFinal(data);
+    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
    * Return the current timestamp using the default window size of 30 seconds.
    *
    * <p>

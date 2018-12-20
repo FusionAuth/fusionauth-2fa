@@ -17,6 +17,7 @@ package io.fusionauth.twofactor;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Formatter;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
@@ -32,7 +33,7 @@ import static org.testng.Assert.assertTrue;
 public class TwoFactorTest {
   @Test
   public void control() throws Exception {
-    byte[] hash = TwoFactor.generateSha1HMAC("FusionAuth", "These pretzels are making me thirsty".getBytes("UTF-8"));
+    byte[] hash = TwoFactor.generateSha1HMAC("FusionAuth", "These pretzels are making me thirsty".getBytes(StandardCharsets.UTF_8));
 
     Formatter formatter = new Formatter();
     for (byte b : hash) {
@@ -81,6 +82,16 @@ public class TwoFactorTest {
         e.printStackTrace();
       }
     });
+  }
+
+  @Test
+  public void test_multipleSHAs() {
+    String rawSecret = "12345678901234567890";
+    String message = "These pretzels are making me thirsty.";
+
+    assertEquals(toHex(TwoFactor.generateSha1HMAC(rawSecret, message.getBytes(StandardCharsets.UTF_8))), "9ed7cd3845e219e7b07543af595d624b777d182d");
+    assertEquals(toHex(TwoFactor.generateSha256HMAC(rawSecret, message.getBytes(StandardCharsets.UTF_8))), "b51f2fb3c5b70e83c251f17ee6d3dec4ea41b507bfe74a88725b5222b93fe589");
+    assertEquals(toHex(TwoFactor.generateSha512HMAC(rawSecret, message.getBytes(StandardCharsets.UTF_8))), "12dba679b1b0ad794852b15ea5d0baf3c342211e4f4aa12eb1e053cdec0bef6d2e5990e67b5532b598f50f9de3415b357eec78eb990d61135616cfe311600262");
   }
 
   /**
