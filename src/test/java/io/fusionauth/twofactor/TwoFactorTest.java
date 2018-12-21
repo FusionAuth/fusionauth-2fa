@@ -18,6 +18,8 @@ package io.fusionauth.twofactor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Formatter;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.IntStream;
@@ -52,6 +54,27 @@ public class TwoFactorTest {
 
     String code = TwoFactor.calculateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant());
     assertTrue(TwoFactor.validateVerificationCode(rawSecret, TwoFactor.getCurrentWindowInstant(), code));
+  }
+
+  /**
+   * @See <a href="https://stackoverflow.com/questions/42546493/generate-a-10-digit-totp-password-with-a-certain-key/"> https://stackoverflow.com/questions/42546493/generate-a-10-digit-totp-password-with-a-certain-key/ </a>
+   */
+  @Test
+  public void stackOverflow_42546493() {
+    //  Mon, 17 Mar 2014 15:20:51 GMT
+    ZonedDateTime date = ZonedDateTime.of(2014, 3, 17, 15, 20, 51, 0, ZoneId.of("GMT"));
+    long seconds = date.toEpochSecond();
+    long timeStep = seconds / 30;
+    assert seconds == 1395069651L;
+
+    String rawSecret = "ninja@example.comHDECHALLENGE003"; // 32 bytes
+    String rawSecret64 = rawSecret + rawSecret; // 64 bytes
+
+    // User is expecting 1773133250, but receives 0490867067
+    // - As far as I can tell 0490867067 is the correct code.
+
+    String code = TwoFactor.calculateVerificationCode(rawSecret64, timeStep, Algorithm.HmacSHA512, 10);
+    assertEquals(code, "0490867067");
   }
 
   /**

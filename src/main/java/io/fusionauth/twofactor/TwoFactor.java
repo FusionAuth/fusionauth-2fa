@@ -82,9 +82,9 @@ public final class TwoFactor {
   /**
    * Calculate a verification code based upon the provided time step, algorithm and desired number of digits.
    *
-   * @param rawSecret The secret.
-   * @param timeStep  The windowed time step to calculate the code.
-   * @param algorithm The SHA algorithm to utilize
+   * @param rawSecret      The secret.
+   * @param timeStep       The windowed time step to calculate the code.
+   * @param algorithm      The SHA algorithm to utilize
    * @param numberOfDigits The desired length of the code in number of digits
    * @return The verification code.
    */
