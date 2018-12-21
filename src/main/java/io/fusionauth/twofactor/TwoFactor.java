@@ -40,20 +40,63 @@ import java.util.concurrent.TimeUnit;
  * @see <a href="https://code.google.com/p/vellum/wiki/GoogleAuthenticator"/>
  */
 public final class TwoFactor {
+  private static final long[] DIGITS_POWER = {
+    1L,                // 0
+    10L,               // 1
+    100L,              // 2
+    1_000L,            // 3
+    10_000L,           // 4
+    100_000L,          // 5
+    1_000_000L,        // 6
+    10_000_000L,       // 7
+    100_000_000L,      // 8
+    1_000_000_000L,    // 9
+    10_000_000_000L,   // 10
+    100_000_000_000L,  // 11
+    1_000_000_000_000L // 12
+  };
+
   /**
-   * Calculate the verification code based upon the provided instant.
+   * Calculate a HMAC SHA-1 6 digit verification code based upon the provided time step.
    *
    * @param rawSecret The secret.
-   * @param instant   The windowed instant to calculate the code.
+   * @param timeStep  The windowed instant to calculate the code.
    * @return The verification code.
    */
-  public static String calculateVerificationCode(String rawSecret, long instant) {
+  public static String calculateVerificationCode(String rawSecret, long timeStep) {
+    return calculateVerificationCode(rawSecret, timeStep, Algorithm.HmacSHA1);
+  }
+
+  /**
+   * Calculate a 6 digit verification code based upon the provided time step.
+   *
+   * @param rawSecret The secret.
+   * @param timeStep  The windowed time step to calculate the code.
+   * @param algorithm The SHA algorithm to utilize
+   * @return The verification code.
+   */
+  public static String calculateVerificationCode(String rawSecret, long timeStep, Algorithm algorithm) {
+    return calculateVerificationCode(rawSecret, timeStep, algorithm, 6);
+  }
+
+  /**
+   * Calculate a verification code based upon the provided time step, algorithm and desired number of digits.
+   *
+   * @param rawSecret The secret.
+   * @param timeStep  The windowed time step to calculate the code.
+   * @param algorithm The SHA algorithm to utilize
+   * @param numberOfDigits The desired length of the code in number of digits
+   * @return The verification code.
+   */
+  public static String calculateVerificationCode(String rawSecret, long timeStep, Algorithm algorithm, int numberOfDigits) {
     // Generate Hashed Message from the secret
-    byte[] hash = generateSha1HMAC(rawSecret, ByteBuffer.allocate(8).putLong(instant).order(ByteOrder.BIG_ENDIAN).array());
+    byte[] hash = generateShaHMAC(rawSecret, ByteBuffer.allocate(8).putLong(timeStep).order(ByteOrder.BIG_ENDIAN).array(), algorithm);
 
     // Truncate the hash and return a left padded string representation
-    int code = bytesToUnsignedInt(hash);
-    return String.format("%06d", code);
+    int offset = hash[hash.length - 1] & 0xf;
+    int binary = ((hash[offset] & 0x7f) << 24) | ((hash[offset + 1] & 0xff) << 16) | ((hash[offset + 2] & 0xff) << 8) | (hash[offset + 3] & 0xff);
+    long otp = binary % DIGITS_POWER[numberOfDigits];
+    return String.format("%0" + numberOfDigits + "d", otp);
   }
 
   /**
@@ -94,7 +137,8 @@ public final class TwoFactor {
   public static byte[] generateSha1HMAC(String rawSecret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA1");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA1"));
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
       throw new IllegalStateException(e);
@@ -112,7 +156,8 @@ public final class TwoFactor {
   public static byte[] generateSha256HMAC(String rawSecret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA256");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA256"));
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
       throw new IllegalStateException(e);
@@ -130,7 +175,27 @@ public final class TwoFactor {
   public static byte[] generateSha512HMAC(String rawSecret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA512");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "HmacSHA512"));
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+
+      return mac.doFinal(data);
+    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+      throw new IllegalStateException(e);
+    }
+  }
+
+  /**
+   * Return the HMAC SHA encoded byte array using provided secret and the data as defined by the HOTP algorithm
+   * defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
+   *
+   * @param rawSecret The raw secret.
+   * @param data      The data to add to the secret - assumed to be a time instant.
+   * @return A byte array of the HMAC SHA hash
+   */
+  public static byte[] generateShaHMAC(String rawSecret, byte[] data, Algorithm algorithm) {
+    try {
+      Mac mac = Mac.getInstance(algorithm.name());
+      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
       throw new IllegalStateException(e);
@@ -150,6 +215,7 @@ public final class TwoFactor {
   public static long getCurrentWindowInstant() {
     return getCurrentWindowInstant(30);
   }
+
 
   /**
    * Return the current timestamp using the specified window size.
@@ -177,25 +243,5 @@ public final class TwoFactor {
   public static boolean validateVerificationCode(String secret, long instant, String code) {
     String actual = calculateVerificationCode(secret, instant);
     return code.equals(actual);
-  }
-
-  /**
-   * Return an int by taking four bytes of the provided byte array and taking the unsigned int value.
-   *
-   * @param hash the hashed message
-   * @return an int value
-   */
-  private static int bytesToUnsignedInt(byte[] hash) {
-    int offset = hash[hash.length - 1] & 0xF;
-    long truncated = 0;
-    for (int i = 0; i < 4; ++i) {
-      truncated <<= 8;
-      truncated |= (hash[offset + i] & 0xFF);
-    }
-
-    truncated &= Integer.MAX_VALUE; // 0x7FFFFFFF
-    truncated %= 0x000F4240; // 10 ^ 6
-
-    return (int) truncated;
   }
 }
