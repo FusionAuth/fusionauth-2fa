@@ -59,38 +59,38 @@ public final class TwoFactor {
   /**
    * Calculate a HMAC SHA-1 6 digit verification code based upon the provided time step.
    *
-   * @param rawSecret The secret.
-   * @param timeStep  The windowed instant to calculate the code.
-   * @return The verification code.
+   * @param secret   The secret
+   * @param timeStep The windowed instant to calculate the code
+   * @return The verification code
    */
-  public static String calculateVerificationCode(String rawSecret, long timeStep) {
-    return calculateVerificationCode(rawSecret, timeStep, Algorithm.HmacSHA1);
+  public static String calculateVerificationCode(byte[] secret, long timeStep) {
+    return calculateVerificationCode(secret, timeStep, Algorithm.HmacSHA1);
   }
 
   /**
    * Calculate a 6 digit verification code based upon the provided time step.
    *
-   * @param rawSecret The secret.
-   * @param timeStep  The windowed time step to calculate the code.
+   * @param secret    The secret
+   * @param timeStep  The windowed time step to calculate the code
    * @param algorithm The SHA algorithm to utilize
    * @return The verification code.
    */
-  public static String calculateVerificationCode(String rawSecret, long timeStep, Algorithm algorithm) {
-    return calculateVerificationCode(rawSecret, timeStep, algorithm, 6);
+  public static String calculateVerificationCode(byte[] secret, long timeStep, Algorithm algorithm) {
+    return calculateVerificationCode(secret, timeStep, algorithm, 6);
   }
 
   /**
    * Calculate a verification code based upon the provided time step, algorithm and desired number of digits.
    *
-   * @param rawSecret      The secret.
-   * @param timeStep       The windowed time step to calculate the code.
+   * @param secret         The secret
+   * @param timeStep       The windowed time step to calculate the code
    * @param algorithm      The SHA algorithm to utilize
    * @param numberOfDigits The desired length of the code in number of digits
-   * @return The verification code.
+   * @return The verification code
    */
-  public static String calculateVerificationCode(String rawSecret, long timeStep, Algorithm algorithm, int numberOfDigits) {
+  public static String calculateVerificationCode(byte[] secret, long timeStep, Algorithm algorithm, int numberOfDigits) {
     // Generate Hashed Message from the secret
-    byte[] hash = generateShaHMAC(rawSecret, ByteBuffer.allocate(8).putLong(timeStep).order(ByteOrder.BIG_ENDIAN).array(), algorithm);
+    byte[] hash = generateShaHMAC(secret, ByteBuffer.allocate(8).putLong(timeStep).order(ByteOrder.BIG_ENDIAN).array(), algorithm);
 
     // Truncate the hash and return a left padded string representation
     int offset = hash[hash.length - 1] & 0xf;
@@ -100,26 +100,26 @@ public final class TwoFactor {
   }
 
   /**
-   * Generates the secret used to generate time based one time passwords. The length of the string will be 20
+   * Generates a Base64 secret used to generate time based one time passwords. The length of the string will be 20
    * characters or 160 bits.
    * <p>
-   * If this secret will be used to generate  QR code to display to a user, it will need to be Base32 encoded.
+   * If this secret will be used to generate  QR code to display to a user, it will need to be re-encoded to Base32.
    *
-   * @return The raw secret.
+   * @return The Base64 encoded secret
    */
-  public static String generateRawSecret() {
-    return generateRawSecret(20);
+  public static String generateBase64EncodedSecret() {
+    return generateBase64EncodedSecret(20);
   }
 
   /**
-   * Generates the secret used to generate time based one time passwords.
+   * Generates a Base64 encoded secret used to generate time based one time passwords.
    * <p>
-   * If this secret will be used to generate  QR code to display to a user, it will need to be Base32 encoded.
+   * If this secret will be used to generate  QR code to display to a user, it will need to be re-encoded to Base32.
    *
-   * @param length the length of the raw secret in characters
-   * @return The raw secret.
+   * @param length the length of the secret in characters
+   * @return The Base64 encoded secret
    */
-  public static String generateRawSecret(int length) {
+  public static String generateBase64EncodedSecret(int length) {
     byte[] buf = new byte[length];
     new SecureRandom().nextBytes(buf);
     String rawSecret = Base64.getEncoder().encodeToString(buf);
@@ -127,17 +127,17 @@ public final class TwoFactor {
   }
 
   /**
-   * Return the HMAC SHA-1 encoded byte array using the base32 encoded secret and the data as
+   * Return the HMAC SHA-1 encoded byte array using the Base32 encoded secret and the data as
    * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
    *
-   * @param rawSecret The secret.
-   * @param data      The data to add to the secret - assumed to be a time instant.
-   * @return A byte array of the HMAC SHA-1 hash.
+   * @param secret The secret
+   * @param data   The data to add to the secret - assumed to be a time instant
+   * @return A byte array of the HMAC SHA-1 hash
    */
-  public static byte[] generateSha1HMAC(String rawSecret, byte[] data) {
+  public static byte[] generateSha1HMAC(byte[] secret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA1");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+      mac.init(new SecretKeySpec(secret, "RAW"));
 
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -146,17 +146,17 @@ public final class TwoFactor {
   }
 
   /**
-   * Return the HMAC SHA-256 encoded byte array using the base32 encoded secret and the data as
+   * Return the HMAC SHA-256 encoded byte array using the Base32 encoded secret and the data as
    * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
    *
-   * @param rawSecret The secret.
-   * @param data      The data to add to the secret - assumed to be a time instant.
-   * @return A byte array of the HMAC SHA-256 hash.
+   * @param secret The secret
+   * @param data   The data to add to the secret - assumed to be a time instant
+   * @return A byte array of the HMAC SHA-256 hash
    */
-  public static byte[] generateSha256HMAC(String rawSecret, byte[] data) {
+  public static byte[] generateSha256HMAC(byte[] secret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA256");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+      mac.init(new SecretKeySpec(secret, "RAW"));
 
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -165,17 +165,17 @@ public final class TwoFactor {
   }
 
   /**
-   * Return the HMAC SHA-512 encoded byte array using the base32 encoded secret and the data as
+   * Return the HMAC SHA-512 encoded byte array using the Base32 encoded secret and the data as
    * defined by the HOTP algorithm defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
    *
-   * @param rawSecret The secret.
-   * @param data      The data to add to the secret - assumed to be a time instant.
-   * @return A byte array of the HMAC SHA-512 hash.
+   * @param secret The secret
+   * @param data   The data to add to the secret - assumed to be a time instant
+   * @return A byte array of the HMAC SHA-512 hash
    */
-  public static byte[] generateSha512HMAC(String rawSecret, byte[] data) {
+  public static byte[] generateSha512HMAC(byte[] secret, byte[] data) {
     try {
       Mac mac = Mac.getInstance("HmacSHA512");
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+      mac.init(new SecretKeySpec(secret, "RAW"));
 
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -187,14 +187,14 @@ public final class TwoFactor {
    * Return the HMAC SHA encoded byte array using provided secret and the data as defined by the HOTP algorithm
    * defined by <a href="https://tools.ietf.org/html/rfc4226">RFC 4226</a>.
    *
-   * @param rawSecret The raw secret.
-   * @param data      The data to add to the secret - assumed to be a time instant.
+   * @param secret The secret
+   * @param data   The data to add to the secret - assumed to be a time instant
    * @return A byte array of the HMAC SHA hash
    */
-  public static byte[] generateShaHMAC(String rawSecret, byte[] data, Algorithm algorithm) {
+  public static byte[] generateShaHMAC(byte[] secret, byte[] data, Algorithm algorithm) {
     try {
       Mac mac = Mac.getInstance(algorithm.name());
-      mac.init(new SecretKeySpec(rawSecret.getBytes(), "RAW"));
+      mac.init(new SecretKeySpec(secret, "RAW"));
 
       return mac.doFinal(data);
     } catch (NoSuchAlgorithmException | InvalidKeyException e) {
@@ -235,12 +235,12 @@ public final class TwoFactor {
   /**
    * Return true if the provided code equals the calculated one based upon the secret and instant.
    *
-   * @param secret  The base32 encoded secret.
+   * @param secret  The secret.
    * @param instant The windowed instant to calculate the code.
    * @param code    The code to validate.
    * @return True if the code is valid.
    */
-  public static boolean validateVerificationCode(String secret, long instant, String code) {
+  public static boolean validateVerificationCode(byte[] secret, long instant, String code) {
     String actual = calculateVerificationCode(secret, instant);
     return code.equals(actual);
   }
