@@ -16,7 +16,7 @@
 
 savantVersion = "1.0.0"
 
-project(group: "io.fusionauth", name: "fusionauth-2FA", version: "2.0.0", licenses: ["ApacheV2_0"]) {
+project(group: "io.fusionauth", name: "fusionauth-2fa", version: "2.0.0", licenses: ["ApacheV2_0"]) {
 
   workflow {
     standard()
