@@ -235,6 +235,21 @@ public final class TwoFactor {
   /**
    * Return true if the provided code equals the calculated one based upon the secret and instant.
    *
+   * @param secret     The secret.
+   * @param instant    The windowed instant to calculate the code.
+   * @param code       The code to validate.
+   * @param algorithm  The algorithm used to validate the code.
+   * @param codeLength The length of code used to calcualte the code.
+   * @return True if the code is valid.
+   */
+  public static boolean validateVerificationCode(byte[] secret, long instant, String code, Algorithm algorithm, int codeLength) {
+    String actual = calculateVerificationCode(secret, instant, algorithm, codeLength);
+    return code.equals(actual);
+  }
+
+  /**
+   * Return true if the provided code equals the calculated one based upon the secret and instant.
+   *
    * @param secret  The secret.
    * @param instant The windowed instant to calculate the code.
    * @param code    The code to validate.
